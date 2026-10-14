@@ -1,157 +1,289 @@
-ProcessOS — AI Process 
-Author: Shubham Kumar Singh
-License: MIT
+# ProcessOS and Rainbow Corp — Local Workflow Automation Demo
 
+**Author:** Shubham Kumar Singh  
+**License:** MIT
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-A workflow-engineering portfolio project built for the Camunda AI Process Forward Deployed Engineer role.
+ProcessOS is a local workflow-engineering studio for describing a business process in plain language, validating its integration endpoints, reviewing a workflow blueprint, and running a bounded build-verification gate before an explicitly authorized local deployment. The included Rainbow Corp application demonstrates the workflow against a refund-request use case with routing, human review, status updates, and a mock refund service.
 
-ProcessOS explores an end-to-end workflow deployment journey: describe a business process in natural language, probe its integrations, review a workflow blueprint, run a bounded Coder/Tester verification gate, and then explicitly authorize a local Camunda deployment. The bundled Rainbow Corp application acts as the example customer system for a refund workflow, including a human-review path and a simulated refund API.
+> **Demo boundary:** This is an independent demonstration, not an official Camunda product. The refund service returns synthetic results only; no real bank, payment provider, or money movement is involved. The current ProcessOS deployment adapter targets the included Rainbow Corp refund integration contract and is not a universal adapter for arbitrary applications.
 
-Scope: This is an independent portfolio demo, not an official Camunda product and not affiliated with Camunda. The refund API is mocked; no real payment provider, bank account, or financial transaction is involved. The current deployment integration is designed around the bundled Rainbow Corp refund contract and is not a universal adapter for arbitrary applications.
+## Features
 
-What the project demonstrates
-Discover before building: conversationally clarify the trigger, business rules, decisions, integrations, and expected outcome.
-Probe before deploy: validate configured HTTP/API and WebSocket endpoints before allowing workflow generation to proceed.
-Bounded build verification: generate and inspect a BPMN workflow through a Coder/Tester gate with a maximum of three iterations in the UI; deterministic checks cover process identifiers, required workflow structure, expressions, and worker-task types.
-Camunda workflow integration: use a controlled local CLI path to validate runtime prerequisites and deploy a verified BPMN process to a local Camunda 8 development runtime.
-Human-in-the-loop decisions: route refund requests above ₹5,000 to human review. Approval can continue to the mock refund task; rejection prevents refund execution.
-Operational visibility: inspect requests, product/customer master data, a human-review queue, activity history, and live workflow status updates in the Rainbow Corp console.
-Integration separation: keep customer-facing request intake separate from the workflow bridge, job workers, routing, and mock refund execution.
-Architecture
-Business request in plainlanguage
-ProcessOS discovery
-Endpoint and contract probes
-Reviewed workflow blueprint
-Coder / Tester gateup to 3 iterations
-Local Camunda 8 runtime
-Separate workflow bridge andjob workers
-Rainbow Corp applicationFastAPI + SQLite + web UI
-Human-review queue
-Mock refund APIsynthetic result only
-Pass + explicit authorization
-Components
-Component	Responsibility	Default local address
-ProcessOS Studio	Discovery, endpoint probing, blueprint review, Coder/Tester gate, local Camunda control	http://127.0.0.1:8090
-Rainbow Corp customer application	Refund-intake chatbot and request status	http://127.0.0.1:8000
-Rainbow Corp admin console	Request register, product/customer master data, human-review queue, activity log	http://127.0.0.1:8000/admin
-Mock Refund API	Returns a simulated refund result and synthetic transaction reference	http://127.0.0.1:8001
-Local Camunda 8 runtime	Executes the deployed BPMN workflow in development	REST API: http://127.0.0.1:8080/v2
-Workflow bridge	Dispatches requests, starts process instances, handles worker jobs and review decisions, syncs results	Local process; no public UI
-Screenshots
-The images below are embedded from the PNG files in this repository's root directory. They show the local demo UI and sample-data outcomes.
+- **Natural-language process discovery:** clarify triggers, business rules, decisions, integrations, and expected outcomes before building.
+- **Endpoint probing:** check configured HTTP/API and WebSocket integration endpoints before workflow generation proceeds.
+- **Reviewed workflow blueprint:** inspect the process ID, threshold, endpoint paths, and business rules before generating the workflow.
+- **Bounded Coder/Tester gate:** check the generated BPMN and related artifacts with a maximum of three iterations in the studio interface; a failed gate blocks deployment.
+- **Camunda integration:** use a controlled local CLI path to check prerequisites and deploy the verified BPMN to a local Camunda 8 development runtime after explicit authorization.
+- **Human-in-the-loop routing:** refund requests above **₹5,000** require human review. Rejection bypasses the mock refund task; approval allows the workflow to continue.
+- **Operational visibility:** review refund requests, master data, human-review decisions, activity records, and workflow status updates.
+- **Separated responsibilities:** keep the customer application independent from the workflow bridge and mock refund service.
 
-ProcessOS: discover, probe, verify, and deploy
-Initial studio and build-gate views
+## Architecture
 
-Discovery	Build and verify	CLI control
-		
-Workflow generation and verification
+```mermaid
+flowchart LR
+    U[Business request in plain language] --> D[ProcessOS discovery]
+    D --> P[Endpoint and contract probes]
+    P --> B[Reviewed workflow blueprint]
+    B --> G[Coder / Tester gate\nup to 3 iterations]
+    G -->|Pass + explicit authorization| C[Local Camunda 8 runtime]
+    C <--> W[Workflow bridge and workers]
+    W <--> A[Rainbow Corp app\nFastAPI + SQLite + web UI]
+    A --> H[Human-review queue]
+    H --> W
+    W <--> M[Mock refund API\nsynthetic result only]
+```
 
+### Components
 
+| Component | Responsibility | Default local address |
+|---|---|---|
+| ProcessOS Studio | Discovery, endpoint probing, blueprint review, Coder/Tester gate, local Camunda control | `http://127.0.0.1:8090` |
+| Rainbow Corp app | Refund intake, request tracking, and customer status | `http://127.0.0.1:8000` |
+| Rainbow Corp admin console | Request register, product/customer master data, human-review queue, and activity log | `http://127.0.0.1:8000/admin` |
+| Mock Refund API | Simulated refund outcome and synthetic transaction reference | `http://127.0.0.1:8001` |
+| Local Camunda 8 runtime | Executes the deployed BPMN workflow in development | `http://127.0.0.1:8080/v2` |
+| Workflow bridge | Dispatches requests, handles workflow jobs and review decisions, and syncs results to the application | Local process; no separate UI |
 
-Local Camunda gate and execution output
+## Screenshots
 
+All screenshots below use repository-relative links to image files in the repository root. Keep the image files alongside this `README.md` so GitHub can render them.
 
+### ProcessOS Studio
 
-Rainbow Corp: refund intake and standard completion
-Customer intake	Request summary	Simulated completion
-		
+#### Initial studio screens
 
+**Discover & Probe**
 
-Rainbow Corp: high-value request and human review
-A high-value request is held for review rather than being refunded directly by the customer-facing app.
+![ProcessOS discovery and endpoint-probing workspace](./processdemo_1.png)
 
-Review required	Workflow running	Pending review queue
-		
-Reviewer decision recorded	Refund after approval	Request status before workflow pickup
-		
-Rainbow Corp admin console
+**Build & Verify**
 
+![ProcessOS build and verification workspace](./processdemo_2.png)
 
-Repository contents
-The repository includes the screenshots above and the source-code bundle Clean_ProcessOS_and_RainbowCorp.zip. Extract the bundle locally before running the applications. The bundle contains the ProcessOS project and the Rainbow Corp demo stack, including the local workflow bridge, BPMN model, mock refund API, and tests.
+**CLI Control**
 
-The extracted source layout is organized around these components:
+![ProcessOS local Camunda control workspace before the gate passes](./processdemo_3.png)
 
+#### Discovery and endpoint verification
+
+![ProcessOS conversational workflow discovery and live endpoint probes](./processdemo_auto1.png)
+
+#### Verified workflow blueprint
+
+![ProcessOS verified blueprint and passing Coder/Tester gate](./processdemo_auto2.png)
+
+#### Local deployment gate
+
+![ProcessOS local Camunda CLI control with deployment gate passed](./processdemo_auto3.png)
+
+### Rainbow Corp refund flow
+
+#### Customer intake
+
+![Rainbow Corp refund assistant welcome screen and request intake](./afterauto_test.png)
+
+#### Request review before submission
+
+![Rainbow Corp refund request summary before confirmation](./afterauto_test1.png)
+
+#### Simulated refund completion
+
+![Rainbow Corp request status showing a completed demo refund](./afterauto_test2.png)
+
+![Rainbow Corp admin register showing the completed demo refund record](./afterauto_test2result.png)
+
+### High-value refund and human review
+
+#### Request requiring review
+
+![High-value refund request summary before submission](./afterauto_test3.png)
+
+#### Workflow accepts the request
+
+![High-value request accepted by the separate workflow engine](./afterauto_test3a.png)
+
+![Admin request row showing pending human review](./afterauto_test3b.png)
+
+#### Human-review queue
+
+![Admin human-review queue with a pending request](./afterauto_test3c.png)
+
+![Admin review row showing a recorded approval](./afterauto_test3d.png)
+
+#### Result after the decision
+
+![High-value request showing simulated refund completion after approval](./afterauto_test3e.png)
+
+### Rainbow Corp admin console and pre-automation state
+
+![Rainbow Corp local data console with request metrics and records](./before_auto_admin_page.png)
+
+![Rainbow Corp customer request queued before workflow dispatch](./BEFORE_AUTOMATION.png)
+
+## Repository contents
+
+The root-level `Clean_ProcessOS_and_RainbowCorp.zip` archive contains the application source. Extract it before running the components.
+
+```text
+.
+├── README.md
+├── Clean_ProcessOS_and_RainbowCorp.zip
+├── processdemo_1.png
+├── processdemo_2.png
+├── processdemo_3.png
+├── processdemo_auto1.png
+├── processdemo_auto2.png
+├── processdemo_auto3.png
+├── afterauto_test.png
+├── afterauto_test1.png
+├── afterauto_test2.png
+├── afterauto_test2result.png
+├── afterauto_test3.png
+├── afterauto_test3a.png
+├── afterauto_test3b.png
+├── afterauto_test3c.png
+├── afterauto_test3d.png
+├── afterauto_test3e.png
+├── before_auto_admin_page.png
+└── BEFORE_AUTOMATION.png
+```
+
+The extracted source bundle is organized into two top-level projects:
+
+```text
 PROCESS/
-  Shubham_Singh_ProcessOS_Demo/
-    main.py                    # ProcessOS FastAPI application
-    processos_studio_agent.py  # Discovery, blueprint and validation logic
-    processos_runtime.py       # Local runtime orchestration
-    camunda_manager.py         # Local Camunda CLI/runtime management
-    static/studio.html         # ProcessOS Studio UI
-    tests/                     # ProcessOS tests
+└── Shubham_Singh_ProcessOS_Demo/
+    ├── main.py
+    ├── processos_runtime.py
+    ├── processos_studio_agent.py
+    ├── camunda_manager.py
+    ├── static/studio.html
+    ├── generated_workflow/
+    ├── tests/test_agent.py
+    ├── requirements.txt
+    ├── requirements-dev.txt
+    └── run.bat
 
 RAINBOW/
-  Rainbow_Corp_Demo_Stack/
-    rainbow_corp_app/          # Customer application, admin UI and SQLite state
-    workflow_assets/           # Camunda BPMN process model
-    local_bridge/              # Workflow bridge and job workers
-    mock_refund_api/           # Simulated refund API
-    tests/                     # Integration and component tests
-Run locally
-The bundle is intended for a local development environment. The commands below are for Windows PowerShell after extracting the ZIP and opening a terminal in the extracted repository root.
+└── Rainbow_Corp_Demo_Stack/
+    ├── rainbow_corp_app/       # Customer UI, API, admin console, SQLite records
+    ├── local_bridge/           # Workflow integration bridge and workers
+    ├── mock_refund_api/        # Simulated refund service
+    ├── workflow_assets/        # BPMN process model
+    └── tests/
+```
 
-1. Configure the demo services
-Copy each component's .env.example to .env and configure local values as described by that component's README. Do not commit .env files or real secrets.
+## Run locally on Windows
 
-Rainbow Corp app: configure INTEGRATION_API_TOKEN.
-Mock Refund API: configure DEMO_REFUND_API_KEY and keep its local bridge configuration consistent.
-ProcessOS Studio: configure OPENAI_API_KEY in its local environment if using the LLM-backed discovery flow.
-Use separate, randomly generated local demo secrets. Never place production credentials, customer data, or private API keys in the repository, screenshots, or issue reports.
+Python 3.11 or newer is recommended for the demo services. Run each service in its own PowerShell terminal from the extracted project directory.
 
-2. Start the Rainbow Corp services
-Open separate PowerShell terminals from the extracted repository root:
+### 1. Configure local environment files
 
-cd RAINBOW/Rainbow_Corp_Demo_Stack/rainbow_corp_app
+Copy the relevant `.env.example` files to `.env` where required and set local demo credentials according to each component's README. Do not commit `.env` files or real credentials.
+
+- ProcessOS uses `OPENAI_API_KEY` for model-backed discovery. Its model default is `gpt-4.1-nano`.
+- The Rainbow Corp application and workflow bridge must use the same `INTEGRATION_API_TOKEN`.
+- The workflow bridge and mock refund API must use the same `DEMO_REFUND_API_KEY`.
+- Configure the workflow REST address and credentials in the bridge environment for the Camunda runtime you use.
+
+Use your own randomly generated demo secrets. Do not use example values as production secrets.
+
+### 2. Start the Rainbow Corp application
+
+```powershell
+cd RAINBOW\Rainbow_Corp_Demo_Stack\rainbow_corp_app
 .\run.bat
-cd RAINBOW/Rainbow_Corp_Demo_Stack/mock_refund_api
+```
+
+Open `http://127.0.0.1:8000` for the customer assistant and `http://127.0.0.1:8000/admin` for the local data console. API documentation is available at `http://127.0.0.1:8000/docs`.
+
+### 3. Start the mock refund API
+
+In a separate terminal:
+
+```powershell
+cd RAINBOW\Rainbow_Corp_Demo_Stack\mock_refund_api
 .\run_mock_api.bat
-The customer app defaults to http://127.0.0.1:8000; the mock API health endpoint defaults to http://127.0.0.1:8001/health.
+```
 
-3. Start ProcessOS Studio
-In another PowerShell terminal:
+Its health endpoint is `http://127.0.0.1:8001/health`.
 
-cd PROCESS/Shubham_Singh_ProcessOS_Demo
+### 4. Start ProcessOS Studio
+
+In a separate terminal:
+
+```powershell
+cd PROCESS\Shubham_Singh_ProcessOS_Demo
 .\run.bat
-Open http://127.0.0.1:8090. Follow the UI to describe the workflow, configure/probe endpoints, review the blueprint, and run the Coder/Tester gate. Deployment remains behind an explicit local control; review the target and workflow before authorizing it.
+```
 
-4. Verify the sample workflow
-Submit a sample refund request in Rainbow Corp and observe the request state in the chat and admin console. Use a request above ₹5,000 to exercise the human-review path. The expected demo behavior is that the workflow controls routing and approval, while the refund service returns only a mock result.
+Open `http://127.0.0.1:8090`. Describe the workflow, provide the relevant integration details when prompted, probe the configured endpoints, review the generated blueprint, and run the Coder/Tester gate. Deployment remains behind an explicit local authorization step.
 
-The ProcessOS integration currently expects the bundled Rainbow Corp contract, including its configured authentication headers, /api/v1/refunds action endpoint, and known worker types. Passing the local tests does not by itself prove that another Camunda cluster or an arbitrary external API is configured and reachable.
+### 5. Run the workflow bridge
 
-Tests and validation
-Run tests from each extracted project environment after installing that project's dependencies. For example:
+Configure `RAINBOW\Rainbow_Corp_Demo_Stack\local_bridge\.env` using its `.env.example`. Start or configure your local Camunda 8 runtime, deploy the BPMN process using the provided deployment script, and then start the bridge using `run_bridge.bat`. Follow the component README for the correct credentials and deployment configuration for your environment.
 
-cd PROCESS/Shubham_Singh_ProcessOS_Demo
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m pytest -q
-cd RAINBOW/Rainbow_Corp_Demo_Stack
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r rainbow_corp_app/requirements.txt -r local_bridge/requirements.txt -r mock_refund_api/requirements.txt pytest
-.\.venv\Scripts\python.exe -m pytest -q tests
-Recorded test results for this bundle: ProcessOS — 28 passed; Rainbow Corp — 22 passed. These test results cover local automated checks; they are not a claim that a clean machine installation or a live external Camunda cluster has been independently verified.
+The included ProcessOS deployment path is designed for the specific Rainbow Corp contract. Its required integration details include the `X-Integration-Key` and `X-Demo-API-Key` headers, the `/api/v1/refunds` action endpoint, and the worker types `register-human-review`, `execute-demo-refund`, `sync-refund-result`, and `record-refund-rejection`. Incompatible contracts are expected to be blocked rather than silently rewriting the existing application or bridge.
 
-Security and demo boundaries
-Keep the web applications bound to 127.0.0.1 for local demonstration. The sample admin console is not intended to be an internet-facing production admin system.
-Never commit .env files, API keys, OAuth secrets, runtime databases, or customer data.
-Endpoint probes are intended to validate integration reachability and contracts, not to execute refund actions.
-The mock refund API creates synthetic outcomes only. No real money is moved.
-Names, orders, email addresses, timestamps, and transaction references shown in screenshots are sample demo data.
-Why this is relevant to Forward Deployed Engineering
-This project demonstrates a practical approach to the delivery loop described in the role: translate an ambiguous business request into an explicit process, validate the integration boundary before deployment, keep human decisions visible, gate execution on verification, expose operational status, and document a repeatable local setup. It also makes the current integration boundary and demo limitations explicit rather than presenting a sample implementation as a production-ready universal platform.
+## Workflow behavior
 
-References
-Camunda
-AI Process Forward Deployed Engineer — role description
-Camunda 8 CLI (c8ctl) getting started
-Author
-Shubham Kumar Singh
+1. A customer submits a refund request through the Rainbow Corp assistant. The request is saved locally in a queued state.
+2. The workflow bridge picks up the request and starts a process instance.
+3. The BPMN amount gateway routes requests of **₹5,000 or less** to automatic demo processing and requests **above ₹5,000** to the human-review task.
+4. A reviewer can approve or reject a request through the admin console. Rejection bypasses the refund API.
+5. When approved, the workflow can call the mock refund service. The bridge syncs its synthetic transaction reference and final status back to the local app.
+6. The customer UI and admin console show the resulting status.
 
-License
+No real refund is issued. The sample services and records are for local demonstration only.
+
+## Tests
+
+Run each test suite from its relevant project folder after installing dependencies.
+
+ProcessOS:
+
+```powershell
+cd PROCESS\Shubham_Singh_ProcessOS_Demo
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+Rainbow Corp:
+
+```powershell
+cd RAINBOW\Rainbow_Corp_Demo_Stack
+python -m pip install -r rainbow_corp_app\requirements.txt -r local_bridge\requirements.txt -r mock_refund_api\requirements.txt pytest
+python -m pytest -q tests
+```
+
+Recorded local test results for this bundle: **28 ProcessOS tests passed** and **22 Rainbow Corp tests passed**. Passing local tests does not by itself verify a fresh machine setup or prove that an external Camunda cluster is configured and reachable.
+
+## Security and limitations
+
+- Keep all demo services bound to loopback (`127.0.0.1`) unless you have added suitable authentication and network controls. The sample admin console is not designed to be exposed publicly.
+- Never commit `.env` files, API keys, OAuth credentials, runtime databases, or real customer data.
+- Endpoint probes validate reachability and integration contracts; they are not intended to execute refund actions.
+- ProcessOS keeps discovered credentials in the running local session and redacts them from model-facing chat text. Restarting the application clears the in-memory session; repeat discovery and probing before running a workflow again.
+- The Coder/Tester gate checks generated workflow artifacts deterministically. A failed verification gate blocks deployment.
+- The workflow adapter currently supports the bundled Rainbow Corp refund contract. Other applications require a compatible contract and integration adapter.
+- The mock refund service creates synthetic results only. No real money moves.
+- Names, emails, order details, and transaction IDs shown in the screenshots are sample demo data.
+
+## References
+
+- [Camunda](https://camunda.com/)
+- [Camunda 8 CLI (`c8ctl`) getting started](https://docs.camunda.io/docs/apis-tools/c8ctl/getting-started/)
+- [Camunda 8 CLI source repository](https://github.com/camunda/c8ctl)
+
+## Author
+
+**Shubham Kumar Singh**
+
+## License
+
 This project is licensed under the MIT License.
 
 Copyright (c) 2026 Shubham Kumar Singh
@@ -173,6 +305,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-
